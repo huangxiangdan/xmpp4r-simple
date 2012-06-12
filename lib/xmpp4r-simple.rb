@@ -113,6 +113,10 @@ module Jabber
     # the message recipient will be set to jid.
     def deliver(jid, message, type=:chat)
       contacts(jid) do |friend|
+        unless subscribed_to? friend
+          add(friend.jid)
+          return deliver_deferred(friend.jid, message, type)
+        end
         if message.kind_of?(Jabber::Message)
           msg = message
           msg.to = friend.jid
@@ -173,7 +177,8 @@ module Jabber
     # the jabber user jid, false otherwise.
     def subscribed_to?(jid)
       contacts(jid) do |contact|
-        return contact.subscribed?
+        return true
+        # return contact.subscribed?
       end
     end
 
