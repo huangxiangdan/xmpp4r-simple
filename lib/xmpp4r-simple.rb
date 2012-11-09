@@ -387,6 +387,7 @@ module Jabber
       # Pre-connect
       @connect_mutex ||= Mutex.new
 
+      puts "before check lock, thread-id:#{Thread.current.object_id}"
       # don't try to connect if another thread is already connecting.
       return if @connect_mutex.locked?
 
@@ -408,7 +409,7 @@ module Jabber
       puts 'before unlock'
       @connect_mutex.unlock
       puts 'after unlock'
-      
+
       status(@presence, @status_message)
     end
 
