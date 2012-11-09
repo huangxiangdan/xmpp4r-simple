@@ -404,10 +404,12 @@ module Jabber
 
       # Post-connect
       register_default_callbacks
-      status(@presence, @status_message)
+
       puts 'before unlock'
       @connect_mutex.unlock
       puts 'after unlock'
+      
+      status(@presence, @status_message)
     end
 
     def disconnect!(auto_reconnect = true)
