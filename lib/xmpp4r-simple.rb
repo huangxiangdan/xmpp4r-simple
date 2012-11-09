@@ -332,6 +332,7 @@ module Jabber
         client.send(msg)
       rescue Errno::EPIPE, IOError => e
         puts "========EPIPE"
+        puts e.inspect
         sleep 1
         disconnect
         reconnect
@@ -389,7 +390,9 @@ module Jabber
       # don't try to connect if another thread is already connecting.
       return if @connect_mutex.locked?
 
+      puts 'before lock'
       @connect_mutex.lock
+      puts 'after lock'
       disconnect!(false) if connected?
 
       # Connect
@@ -402,7 +405,9 @@ module Jabber
       # Post-connect
       register_default_callbacks
       status(@presence, @status_message)
+      puts 'before unlock'
       @connect_mutex.unlock
+      puts 'after unlock'
     end
 
     def disconnect!(auto_reconnect = true)
