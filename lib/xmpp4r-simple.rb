@@ -87,8 +87,8 @@ module Jabber
       @jid = jid
       @password = password
       @disconnected = false
-      status(status, status_message)
-      start_deferred_delivery_thread
+      # status(status, status_message)
+      # start_deferred_delivery_thread
     end
 
     def inspect #:nodoc:
