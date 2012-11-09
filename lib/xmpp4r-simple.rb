@@ -331,14 +331,16 @@ module Jabber
         attempts += 1
         client.send(msg)
       rescue Errno::EPIPE, IOError => e
+        puts "========EPIPE"
         sleep 1
         disconnect
         reconnect
         retry unless attempts > 3
         raise e
       rescue Errno::ECONNRESET => e
-        # sleep (attempts^2) * 60 + 60
-        sleep (attempts^2) * 1 + 2
+        puts "========ECONNRESET"
+        sleep (attempts^2) * 60 + 60
+        # sleep (attempts^2) * 1 + 2
         disconnect
         reconnect
         retry unless attempts > 3
@@ -382,12 +384,12 @@ module Jabber
     def connect!
       raise ConnectionError, "Connections are disabled - use Jabber::Simple::force_connect() to reconnect." if @disconnected
       # Pre-connect
-      # @connect_mutex ||= Mutex.new
+      @connect_mutex ||= Mutex.new
 
       # don't try to connect if another thread is already connecting.
-      # return if @connect_mutex.locked?
+      return if @connect_mutex.locked?
 
-      # @connect_mutex.lock
+      @connect_mutex.lock
       disconnect!(false) if connected?
 
       # Connect
@@ -400,7 +402,7 @@ module Jabber
       # Post-connect
       register_default_callbacks
       status(@presence, @status_message)
-      # @connect_mutex.unlock
+      @connect_mutex.unlock
     end
 
     def disconnect!(auto_reconnect = true)
