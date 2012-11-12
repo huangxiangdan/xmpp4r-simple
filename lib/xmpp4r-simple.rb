@@ -87,8 +87,8 @@ module Jabber
       @jid = jid
       @password = password
       @disconnected = false
-      # status(status, status_message)
-      # start_deferred_delivery_thread
+      status(status, status_message)
+      start_deferred_delivery_thread
     end
 
     def inspect #:nodoc:
@@ -331,17 +331,13 @@ module Jabber
         attempts += 1
         client.send(msg)
       rescue Errno::EPIPE, IOError => e
-        puts "========EPIPE"
-        puts e.inspect
         sleep 1
         disconnect
         reconnect
         retry unless attempts > 3
         raise e
       rescue Errno::ECONNRESET => e
-        puts "========ECONNRESET"
         sleep (attempts^2) * 60 + 60
-        # sleep (attempts^2) * 1 + 2
         disconnect
         reconnect
         retry unless attempts > 3
@@ -387,13 +383,10 @@ module Jabber
       # Pre-connect
       @connect_mutex ||= Mutex.new
 
-      puts "before check lock, thread-id:#{Thread.current.object_id}"
       # don't try to connect if another thread is already connecting.
       return if @connect_mutex.locked?
 
-      puts 'before lock'
       @connect_mutex.lock
-      puts 'after lock'
       disconnect!(false) if connected?
 
       # Connect
@@ -404,13 +397,9 @@ module Jabber
       self.client = my_client
 
       # Post-connect
-      # register_default_callbacks
-
-      puts 'before unlock'
+      register_default_callbacks
+      status(@presence, @status_message)
       @connect_mutex.unlock
-      puts 'after unlock'
-
-      # status(@presence, @status_message)
     end
 
     def disconnect!(auto_reconnect = true)
